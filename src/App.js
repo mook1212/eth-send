@@ -308,254 +308,126 @@ function App() {
       />
       <p>Your TST balance: {balance}</p>
 
+      <SendToken></SendToken>
+      <SendToken2></SendToken2>
 
-      <Send></Send>
-      {/* <TransferTST></TransferTST> */}
-      {/* <TransferToken></TransferToken> */}
-      {/* <Routes>
-        <Route></Route>
-      </Routes> */}
     </div>
 
   );
 }
 
-// const handleSend = async () => {
-//   const decimals = 16;
-//   const walletAddress = "0xB5F2fdD744266b52F528Ffee50502f21Fc0DADbd";
-//   const nonce = await web3.eth.getTransactionCount(walletAddress);
-//   const data = TSTADDRESS.methods.transfer(document.getElementById('box1').value, amount * 10 ** decimals).encodeABI();
-//   const gasPrice = (await web3.eth.getGasPrice()).toString();
-//   const gasLimit = 500000;
-
-function Send() {
-  const TSTADDRESS = new web3.eth.Contract(TST_ABI, '0xEeAf2AabDAa7326b617D8021e46A1D0C7373A031');
-
-  const [receiverAddress, setReceiverAddress] = useState("");
+const SendToken = () => {
+  const [toAddress, setToAddress] = useState('');
   const [amount, setAmount] = useState(0);
 
-  const handleSend = async () => {
-    const decimals = 1;
-    const walletAddress = "0xB5F2fdD744266b52F528Ffee50502f21Fc0DADbd";
-    const nonce = await web3.eth.getTransactionCount(walletAddress);
-    const data = TSTADDRESS.methods.transfer(document.getElementById('box1').value, amount * 10 ** decimals).encodeABI();
-    const gasPrice = (await web3.eth.getGasPrice()).toString();
-    const gasLimit = 500000;
+  const handleSubmit = async () => {
+    const privateKey = "0xf47e7c0766703edea7162fbc5cb51379e2c314ff615485da2815b3c35a314ee5";
+    const fromAddress = "0x3da00E166f46426e0c6d13cDA54e93C0077391f6";
 
+    const contract = new web3.eth.Contract(TST_ABI, TST_ADDRESS);
+    const nonce = await web3.eth.getTransactionCount(fromAddress);
+    const gasPrice = await web3.eth.getGasPrice();
+
+    const data = contract.methods.transfer(toAddress, web3.utils.toWei(amount.toString(), 'ether')).encodeABI();
 
     const rawTransaction = {
-      nonce,
+      from: fromAddress, // 보내는 사람의 address
+      to: TST_ADDRESS, // TST의 컨트렉트 주소를 거쳐가야함
+      nonce: nonce,
       gasPrice: gasPrice,
-      gasLimit: gasLimit,
-      from: walletAddress,
-      to: receiverAddress,
-      value: '0',
-      data: data,
+      gasLimit: 200000,
+      value: 0,
+      data: data
     };
 
-    const transaction = await web3.eth.sendTransaction(rawTransaction);
-    console.log("Transaction:", transaction);
+    const transaction = await web3.eth.accounts.signTransaction(rawTransaction, privateKey);
+
+    await web3.eth.sendSignedTransaction(transaction.rawTransaction);
   };
 
   return (
     <div>
       <h1>TST 전송</h1>
-      <input
-        id='box1'
-        type="text"
-        style={{ width: '400px' }}
-        onChange={(e) => setReceiverAddress(e.target.value)}
-        placeholder="Receiver Address"
-      />
+      <input style={{ width: '400px' }} type="text" value={toAddress} onChange={e => setToAddress(e.target.value)} />
       <br></br>
       <br></br>
-      <input
-        id='box2'
-        type="number"
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-        placeholder="Amount"
-      />
-      <button onClick={handleSend}>Send</button>
+      <input type="number" value={amount} onChange={e => setAmount(e.target.value)} />
+      <br></br>
+      <button onClick={handleSubmit}>Send</button>
     </div>
   );
-}
-
-// const TSTADDRESS = '0xEeAf2AabDAa7326b617D8021e46A1D0C7373A031';
-// const ABI = [{ "constant": false, "inputs": [{ "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transfer", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" }];
-// const decimals = 1;
-// const walletAddress = '0xB5F2fdD744266b52F528Ffee50502f21Fc0DADbd';
-// const receiverAddress = document.getElementById('box1').value;
-// const amount = document.getElementById('box2').value * 10 ** decimals;
-
-// const handleSend = async () => {
-//   const nonce = await axios.post('https://mainnet.infura.io/v3/{PROJECT_ID}', {
-//     jsonrpc: '2.0',
-//     method: 'eth_getTransactionCount',
-//     params: [walletAddress, 'latest'],
-//     id: 1
-//   }).then(res => res.data.result);
-
-//   const data = web3.eth.contract(ABI).at(TSTADDRESS).transfer.getData(receiverAddress, amount);
-//   const gasPrice = (await axios.post('https://mainnet.infura.io/v3/{PROJECT_ID}', {
-//     jsonrpc: '2.0',
-//     method: 'eth_gasPrice',
-//     params: [],
-//     id: 1
-//   })).data.result;
-//   const gasLimit = 500000;
-
-//   const rawTransaction = {
-//     nonce: '0x' + nonce.toString(16),
-//     gasPrice: '0x' + gasPrice.toString(16),
-//     gasLimit: '0x' + gasLimit.toString(16),
-//     to: TSTADDRESS,
-//     value: '0x0',
-//     data: data
-//   };
-
-//   const privateKey = Buffer.from('{PRIVATE_KEY}', 'hex');
-//   const tx = new EthereumTx(rawTransaction);
-//   tx.sign(privateKey);
-
-//   const serializedTx = tx.serialize();
-
-//   await axios.post('https://mainnet.infura.io/v3/{PROJECT_ID}', {
-//     jsonrpc: '2.0',
-//     method: 'eth_sendRawTransaction',
-//     params: ['0x' + serializedTx.toString('hex'),
-//       id: 1
-// });
-//   const { data } = response;
-//   console.log(data);
-// }
-
-// sendRawTransaction();
-// };
-
-// return (
-
-//   <div>
-//     <input
-//       id='box1'
-//       type="text"
-//       style={{ width: '400px' }}
-//       onChange={(e) => setReceiverAddress(e.target.value)}
-//       placeholder="Receiver Address"
-//     />
-//     <br></br>
-//     <br></br>
-//     <input
-//       id='box2'
-//       type="number"
-//       value={amount}
-//       onChange={(e) => setAmount(e.target.value)}
-//       placeholder="Amount"
-//     />
-//     <button onClick={handleSend}>Send</button>
-//   </div>
-// );
-// }
+};
 
 
-// const TransferTST = () => {
-//   const [privateKey, setPrivateKey] = useState('');
+const SendToken2 = () => {
+  const [toAddress, setToAddress] = useState('');
+  const [amount, setAmount] = useState(0);
+  const [commissionAddress, setCommissionAddress] = useState('0x3C6c748D2E61b0e71a0e219E0fEA944ADe8863D3');
+  const [commissionPercentage, setCommissionPercentage] = useState(10);
 
-//   const handlePrivateKeyChange = (e) => {
-//     setPrivateKey(e.target.value);
-//   };
+  const handleSubmit = async () => {
+    // 송신자 address
+    const fromAddress = "0x3da00E166f46426e0c6d13cDA54e93C0077391f6";
+    // 송신자 address의 개인키
+    const privateKey = "0xf47e7c0766703edea7162fbc5cb51379e2c314ff615485da2815b3c35a314ee5";
 
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
+    const contract = new web3.eth.Contract(TST_ABI, TST_ADDRESS);
+    const nonce = await web3.eth.getTransactionCount(fromAddress);
+    const gasPrice = await web3.eth.getGasPrice();
 
-//     const walletAddress = '0xB5F2fdD744266b52F528Ffee50502f21Fc0DADbd';
-//     const nonce = await web3.eth.getTransactionCount(walletAddress);
+    const data = contract.methods.transfer(toAddress, web3.utils.toWei(amount.toString(), 'ether')).encodeABI();
 
-//     const rawTransaction = {
-//       nonce,
-//       gasPrice: '20000000000',
-//       gasLimit: '21000',
-//       to: recipientAddress,
-//       value: web3.utils.toHex(amountInWei),
-//       data: contract.methods.transfer(recipientAddress, amountInTst).encodeABI(),
-//     };
+    const rawTransaction = {
+      from: fromAddress,
+      to: TST_ADDRESS,
+      nonce: nonce,
+      gasPrice: gasPrice,
+      gasLimit: 200000,
+      value: 0,
+      data: data
+    };
 
-//     const transaction = new EthereumTx(rawTransaction);
-//     transaction.sign(Buffer.from(privateKey, 'hex'));
+    const transaction = await web3.eth.accounts.signTransaction(rawTransaction, privateKey);
 
-//     web3.eth.sendSignedTransaction(`0x${transaction.serialize().toString('hex')}`)
-//       .once('transactionHash', (hash) => {
-//         console.log(`Transaction hash: ${hash}`);
-//       });
-//   };
+    await web3.eth.sendSignedTransaction(transaction.rawTransaction).then(async receipt => {
+      console.log("TST transfer completed");
+      const commissionAmount = (amount * commissionPercentage) / 100;
 
-//   return (
-//     <form onSubmit={handleSubmit}>
-//       <input type="text" value={privateKey} onChange={handlePrivateKeyChange} />
-//       <button type="submit">Submit</button>
-//     </form>
-//   );
-// };
+      // send the commission
+      const data = contract.methods.transfer(commissionAddress, web3.utils.toWei(commissionAmount.toString(), 'ether')).encodeABI();
+      const commissionTransaction = {
+        from: fromAddress,
+        to: TST_ADDRESS,
+        nonce: nonce + 1, // increment the nonce
+        gasPrice: gasPrice,
+        gasLimit: 200000,
+        value: 0,
+        data: data
+      };
+      const signedCommissionTransaction = await web3.eth.accounts.signTransaction(commissionTransaction, privateKey);
+      await web3.eth.sendSignedTransaction(signedCommissionTransaction.rawTransaction)
+        .then(() => console.log("Commission success"))
+        .catch(() => console.log("Commission failure"));
+    }).catch(() => console.log("TST transfer failed"));
+    
+  };
 
-
-
-// const TransferToken = () => {
-//   const [recipientAddress, setRecipientAddress] = useState('');
-//   const [amount, setAmount] = useState('');
-
-
-//   const handleSubmit = async (event) => {
-//     event.preventDefault();
-
-//     // Connect to the Ethereum network using Web3
-//     const web3 = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/v3/d7416d11bb9e43d4bc2ab73459ac88d6'));
-
-//     // Get the contract instance
-//     const contract = new web3.eth.Contract(TST_ABI, TST_ADDRESS);
-
-//     // Get the current account
-//     // const accounts = await web3.eth.getAccounts();
-
-//     const sender = '0xB5F2fdD744266b52F528Ffee50502f21Fc0DADbd';
-
-//     // Transfer the tokens
-//     contract.methods.transfer(recipientAddress, amount).send({ from: sender })
-
-//       .on('transactionHash', (hash) => {
-//         console.log(`Transaction hash: ${hash}`);
-//       })
-//       .on('confirmation', (confirmationNumber, receipt) => {
-//         console.log(`Confirmation number: ${confirmationNumber}`);
-//       })
-//       .on('receipt', (receipt) => {
-//         console.log(`Transaction receipt: ${receipt}`);
-//       })
-//       .on('error', (error) => {
-//         console.error(error);
-//       });
-//   };
-
-//   return (
-//     <>
-//       <h1>TST 전송</h1>
-//       <form onSubmit={handleSubmit}>
-//         <div>
-//           <label htmlFor="recipientAddress">To:&nbsp;</label>
-//           <input style={{ width: '400px' }} type="text" id="recipientAddress" value={recipientAddress} onChange={(event) => setRecipientAddress(event.target.value)} />
-//         </div>
-//         <div>
-//           <label htmlFor="amount">Amount: &nbsp;</label>
-//           <input type="text" id="amount" value={amount} onChange={(event) => setAmount(event.target.value)} />
-//         </div>
-//         <button type="submit">Go</button>
-//       </form>
-//     </>
-//   );
-// };
-
-
+  return (
+    <div>
+      <h1>TST Token Transfer</h1>
+      <input style={{ width: '400px' }} type="text" value={toAddress} onChange={e => setToAddress(e.target.value)} />
+      <br />
+      <br />
+      <input type="number" value={amount} onChange={e => setAmount(e.target.value)} />
+      <br />
+      <br />
+      <input style={{ width: '400px' }} type="text" value={commissionAddress} onChange={e => setCommissionAddress(e.target.value)} />
+      <br />
+      <br />
+      <button onClick={() => handleSubmit()}>Submit</button>
+    </div>
+  );
+};
 
 export default App;
 
-
-// export default TransferToken;

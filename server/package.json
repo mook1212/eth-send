@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "bitcore-lib": "^8.25.40",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "eth-sig-util": "^3.0.1",
+    "ethereum-qr-code": "^0.3.0",
+    "ethers": "^6.0.2",
+    "express": "^4.18.2",
+    "mongodb": "^4.13.0",
+    "nodemon": "^2.0.20",
+    "qr-image": "^3.2.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  }
+}
